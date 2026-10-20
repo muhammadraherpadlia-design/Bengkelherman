@@ -1,0 +1,843 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#071224">
+  <title>Admin Dashboard | Bengkel HERMAN Teknik</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #071224;
+      --sidebar-bg: #0b1a33;
+      --card-bg: #0f2447;
+      --card-border: #1d3b6a;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --primary: #0284c7;
+      --primary-hover: #0369a1;
+      --accent-green: #10b981;
+      --accent-red: #ef4444;
+      --sidebar-w: 260px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      min-height: 100vh;
+      display: flex;
+    }
+    
+    /* Login Centered Container */
+    #loginWrapper {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at center, #112850 0%, #060d1a 100%);
+      z-index: 999;
+      padding: 20px;
+    }
+    .login-box {
+      width: 100%;
+      max-width: 420px;
+      background: var(--sidebar-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 32px 28px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    }
+    .login-box h2 { font-size: 24px; margin-bottom: 8px; color: #fff; }
+    .login-box p { color: var(--text-muted); font-size: 14px; margin-bottom: 24px; }
+
+    /* Main Dashboard Layout */
+    .app-layout {
+      display: flex;
+      width: 100%;
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    aside.sidebar {
+      width: var(--sidebar-w);
+      background-color: var(--sidebar-bg);
+      border-right: 1px solid var(--card-border);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 50;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .sidebar-brand {
+      padding: 24px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid var(--card-border);
+    }
+    .brand-icon {
+      width: 42px;
+      height: 42px;
+      background: linear-gradient(135deg, #0284c7, #2563eb);
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      font-size: 20px;
+    }
+    .brand-text h1 { font-size: 16px; font-weight: 800; color: #fff; line-height: 1.2; }
+    .brand-text span { font-size: 11px; letter-spacing: 2px; color: #38bdf8; font-weight: 700; }
+
+    .sidebar-menu {
+      padding: 20px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+      overflow-y: auto;
+    }
+    .menu-title {
+      font-size: 11px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      padding: 12px 14px 6px;
+      font-weight: 700;
+    }
+    .menu-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 16px;
+      border-radius: 10px;
+      border: 0;
+      background: transparent;
+      color: #cbd5e1;
+      font: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: left;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .menu-btn:hover {
+      background-color: rgba(255,255,255,0.06);
+      color: #fff;
+    }
+    .menu-btn.active {
+      background: linear-gradient(90deg, #0284c7, #2563eb);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35);
+    }
+
+    .sidebar-footer {
+      padding: 16px;
+      border-top: 1px solid var(--card-border);
+      background: rgba(0,0,0,0.15);
+    }
+    .user-pill {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-bottom: 12px;
+      margin-bottom: 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .user-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #1e3a8a;
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+      color: #93c5fd;
+    }
+    .user-info { font-size: 13px; line-height: 1.2; overflow: hidden; }
+    .user-name { font-weight: 700; color: #fff; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
+    .user-role { font-size: 11px; color: var(--text-muted); }
+
+    /* Content Area */
+    .main-wrapper {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+    .topbar {
+      height: 68px;
+      background: rgba(11, 26, 51, 0.8);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      position: sticky;
+      top: 0;
+      z-index: 40;
+    }
+    .menu-toggle {
+      display: none;
+      background: transparent;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      color: #fff;
+      padding: 8px 12px;
+      font-size: 18px;
+      cursor: pointer;
+    }
+    .content-body {
+      padding: 32px;
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      flex: 1;
+    }
+
+    /* Cards & Panels */
+    .tab-section { display: none; }
+    .tab-section.active { display: block; animation: fadeIn 0.2s ease-in-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    .card-header {
+      margin-bottom: 20px;
+    }
+    .card-header h2 { font-size: 20px; color: #fff; margin-bottom: 4px; }
+    .card-header p { font-size: 13px; color: var(--text-muted); }
+
+    /* Forms */
+    .field { margin-bottom: 16px; }
+    .field label { display: block; font-size: 13px; font-weight: 600; color: #cbd5e1; margin-bottom: 6px; }
+    .field input {
+      width: 100%;
+      background: #09172e;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      color: #fff;
+      font: inherit;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .field input:focus { border-color: #38bdf8; }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: var(--primary);
+      color: #fff;
+      border: 0;
+      border-radius: 8px;
+      padding: 12px 20px;
+      font: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+    .btn:hover { background: var(--primary-hover); }
+    .btn.success { background: var(--accent-green); }
+    .btn.danger { background: var(--accent-red); }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    /* Status Notifications */
+    .status-msg {
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      margin-bottom: 16px;
+      display: none;
+    }
+    .status-msg.show { display: block; }
+    .status-msg.error { background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); color: #fca5a5; }
+    .status-msg.success { background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); color: #6ee7b7; }
+
+    /* Products Grid */
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 18px;
+      margin-top: 20px;
+    }
+    .product-card {
+      background: #09172e;
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .product-card img {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+      background: #060e1d;
+    }
+    .product-card-body {
+      padding: 14px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .product-card-body h3 { font-size: 14px; font-weight: 600; color: #fff; }
+
+    /* Stats Overview */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      padding: 20px;
+      border-radius: 12px;
+    }
+    .stat-card span { font-size: 13px; color: var(--text-muted); }
+    .stat-card h3 { font-size: 28px; color: #38bdf8; margin-top: 4px; }
+
+    /* Responsive */
+    @media (max-width: 860px) {
+      aside.sidebar { transform: translateX(-100%); }
+      aside.sidebar.open { transform: translateX(0); }
+      .main-wrapper { margin-left: 0; }
+      .menu-toggle { display: block; }
+      .topbar { padding: 0 18px; }
+      .content-body { padding: 20px 16px; }
+    }
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 45;
+    }
+    .sidebar-overlay.show { display: block; }
+  </style>
+</head>
+<body>
+
+  <!-- MODAL LOGIN (Tampil jika belum login) -->
+  <div id="loginWrapper">
+    <div class="login-box">
+      <h2>🔐 Login Admin</h2>
+      <p>Panel pengelolaan Bengkel HERMAN Teknik</p>
+      <div id="loginStatus" class="status-msg"></div>
+      <form id="loginForm">
+        <div class="field">
+          <label for="loginEmail">Email Supabase</label>
+          <input type="email" id="loginEmail" placeholder="admin@domain.com" required autocomplete="username">
+        </div>
+        <div class="field">
+          <label for="loginPassword">Kata Sandi</label>
+          <input type="password" id="loginPassword" placeholder="••••••••" required autocomplete="current-password">
+        </div>
+        <button type="submit" class="btn" style="width:100%">Masuk ke Dashboard</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- APP LAYOUT (Sidebar + Main Area) -->
+  <div class="app-layout" id="appLayout" style="display:none">
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-icon">⚒</div>
+        <div class="brand-text">
+          <h1>HERMAN TEKNIK</h1>
+          <span>PANEL ADMIN</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-menu">
+        <div class="menu-title">Menu Utama</div>
+        <button type="button" class="menu-btn active" data-tab="tabDashboard">
+          <span>📊</span> Dashboard
+        </button>
+        <button type="button" class="menu-btn" data-tab="tabHero">
+          <span>🖼</span> Banner Utama
+        </button>
+        <button type="button" class="menu-btn" data-tab="tabVideoBg">
+          <span>🎬</span> Background Video
+        </button>
+        <button type="button" class="menu-btn" data-tab="tabProduk">
+          <span>📦</span> Kelola Produk
+        </button>
+        <button type="button" class="menu-btn" data-tab="tabAkun">
+          <span>👤</span> Akun Admin
+        </button>
+
+        <div class="menu-title">Navigasi Luar</div>
+        <a href="index.html" class="menu-btn" target="_blank">
+          <span>🌐</span> Buka Website
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-pill">
+          <div class="user-avatar" id="avatarInitial">A</div>
+          <div class="user-info">
+            <div class="user-name" id="userNameLabel">Admin</div>
+            <div class="user-role" id="userEmailLabel">admin@mail.com</div>
+          </div>
+        </div>
+        <button type="button" class="btn danger" id="logoutBtn" style="width:100%; padding:9px;">
+          <span>🚪</span> Keluar
+        </button>
+      </div>
+    </aside>
+
+    <!-- CONTENT WRAPPER -->
+    <div class="main-wrapper">
+      <header class="topbar">
+        <button type="button" class="menu-toggle" id="menuToggle">☰</button>
+        <h2 style="font-size:17px; font-weight:700" id="topbarTitle">Dashboard</h2>
+        <a href="index.html" class="btn" style="padding:7px 14px; font-size:12px;">Lihat Web ↗</a>
+      </header>
+
+      <main class="content-body">
+        
+        <!-- TAB 1: DASHBOARD OVERVIEW -->
+        <section id="tabDashboard" class="tab-section active">
+          <div class="stats-grid">
+            <div class="stat-card">
+              <span>Total Produk</span>
+              <h3 id="statTotalProduct">0</h3>
+            </div>
+            <div class="stat-card">
+              <span>Status Server</span>
+              <h3 style="color:#10b981">Terkoneksi</h3>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h2>Panduan Singkat</h2>
+              <p>Kelola konten website resmi Anda dengan mudah melalui tab di sidebar sebelah kiri.</p>
+            </div>
+            <ul style="padding-left:20px; line-height:1.8; color:#cbd5e1; font-size:14px;">
+              <li><strong>Banner Utama:</strong> Ganti foto header beranda website.</li>
+              <li><strong>Background Video:</strong> Unggah video latar belakang dari galeri beserta suaranya.</li>
+              <li><strong>Kelola Produk:</strong> Tambahkan foto hasil las/pekerjaan atau hapus produk lama.</li>
+              <li><strong>Akun Admin:</strong> Perbarui nama tampilan atau ganti password akun.</li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- TAB 2: GANTI FOTO UTAMA -->
+        <section id="tabHero" class="tab-section">
+          <div class="card">
+            <div class="card-header">
+              <h2>Foto Banner Utama</h2>
+              <p>Foto ini tampil paling atas sebagai background hero pada halaman utama website.</p>
+            </div>
+            <div id="heroStatus" class="status-msg"></div>
+            <div style="display:flex; flex-wrap:wrap; gap:24px; align-items:center;">
+              <img id="heroPreview" src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=600&q=75" alt="Pratinjau Foto" style="width:100%; max-width:320px; aspect-ratio:16/9; object-fit:cover; border-radius:10px; border:1px solid var(--card-border);">
+              <form id="heroForm" style="flex:1; min-width:260px;">
+                <div class="field">
+                  <label for="heroFile">Pilih Gambar Baru (JPG, PNG, WEBP - Maks. 5MB)</label>
+                  <input type="file" id="heroFile" accept="image/jpeg,image/png,image/webp" required>
+                </div>
+                <button type="submit" class="btn">Simpan Foto Banner</button>
+              </form>
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB 3: BACKGROUND VIDEO GALERI (DENGAN SUARA) -->
+        <section id="tabVideoBg" class="tab-section">
+          <div class="card">
+            <div class="card-header">
+              <h2>Background Video Website (Dari Galeri)</h2>
+              <p>Unggah file video (MP4/WEBM) langsung dari perangkat Anda untuk dijadikan latar belakang bersuara.</p>
+            </div>
+            <div id="videoStatus" class="status-msg"></div>
+            
+            <form id="videoBgForm">
+              <div class="field">
+                <label for="videoFile">Pilih File Video (MP4, WEBM - Maks. 230MB)</label>
+                <input type="file" accept="video/mp4,video/webm" id="videoInput">
+
+              </div>
+              <button type="submit" class="btn">Upload & Simpan Background Video</button>
+            </form>
+
+            <div style="margin-top: 24px;">
+              <label style="display: block; font-size: 13px; font-weight: 600; color: #cbd5e1; margin-bottom: 6px;">Pratinjau Video Aktif:</label>
+              <div id="videoPreviewContainer" style="width: 100%; max-width: 320px; aspect-ratio: 16/9; background: #060e1d; border-radius: 10px; border: 1px solid var(--card-border); overflow: hidden; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-size: 13px;">
+                Memuat pratinjau...
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB 4: KELOLA PRODUK -->
+        <section id="tabProduk" class="tab-section">
+          <div class="card">
+            <div class="card-header">
+              <h2>Tambah Produk / Pekerjaan Baru</h2>
+              <p>Foto hasil kerja yang diunggah akan langsung muncul di katalog depan website.</p>
+            </div>
+            <div id="productStatus" class="status-msg"></div>
+            <form id="productForm">
+              <div class="field">
+                <label for="productName">Nama Pekerjaan / Produk</label>
+                <input type="text" id="productName" placeholder="Contoh: Kanopi Besi Hollow Minimalis" required maxlength="100">
+              </div>
+              <div class="field">
+                <label for="productFile">Foto Hasil Kerja (JPG, PNG, WEBP - Maks. 5MB)</label>
+                <input type="file" id="productFile" accept="image/jpeg,image/png,image/webp" required>
+              </div>
+              <button type="submit" class="btn success">＋ Tambah ke Website</button>
+            </form>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h2>Daftar Produk di Website</h2>
+              <p>Kelola atau hapus produk yang sedang tampil di beranda.</p>
+            </div>
+            <div id="productList" class="product-grid">
+              <p style="color:var(--text-muted)">Memuat daftar produk...</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB 5: AKUN ADMIN -->
+        <section id="tabAkun" class="tab-section">
+          <div class="card">
+            <div class="card-header">
+              <h2>Pengaturan Akun Admin</h2>
+              <p>Perbarui profil dan keamanan kata sandi Anda.</p>
+            </div>
+            <div id="accountStatus" class="status-msg"></div>
+            <form id="accountForm" style="max-width:480px;">
+              <div class="field">
+                <label for="newUsername">Nama Tampilan Admin</label>
+                <input type="text" id="newUsername" placeholder="Admin Herman" maxlength="40">
+              </div>
+              <div class="field">
+                <label for="newPassword">Kata Sandi Baru (Kosongkan jika tidak ingin diubah)</label>
+                <input type="password" id="newPassword" placeholder="Minimal 8 karakter" minlength="8" autocomplete="new-password">
+              </div>
+              <button type="submit" class="btn">💾 Simpan Perubahan</button>
+            </form>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    'use strict';
+    const SUPABASE_URL = 'https://bysbpydfqojqpsrzkeae.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_edhNibeP9vl1G0kqMSLzXg_lbp5PuIU';
+    const BUCKET = 'bengkel-media';
+    const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const $ = id => document.getElementById(id);
+
+    function showStatus(id, msg, isError = false) {
+      const el = $(id);
+      el.textContent = msg;
+      el.className = 'status-msg show ' + (isError ? 'error' : 'success');
+      setTimeout(() => { el.className = 'status-msg'; }, 6000);
+    }
+
+    function safeFileName(str) {
+      return str.normalize('NFKD').replace(/[^a-zA-Z0-9._-]/g, '-').slice(-80) || 'file';
+    }
+
+    /* Tab Switching System */
+    const tabButtons = document.querySelectorAll('.sidebar-menu .menu-btn[data-tab]');
+    const tabSections = document.querySelectorAll('.tab-section');
+    tabButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        tabButtons.forEach(b => b.classList.remove('active'));
+        tabSections.forEach(s => s.classList.remove('active'));
+        btn.classList.add('active');
+        const targetId = btn.getAttribute('data-tab');
+        $(targetId).classList.add('active');$('topbarTitle').textContent = btn.innerText.trim();
+        // Tutup mobile drawer saat menu diklik
+        $('sidebar').classList.remove('open');$('sidebarOverlay').classList.remove('show');
+      });
+    });
+
+    /* Mobile Sidebar Toggle */
+    $('menuToggle').addEventListener('click', () => {
+      $('sidebar').classList.toggle('open');$('sidebarOverlay').classList.toggle('show');
+    });
+    $('sidebarOverlay').addEventListener('click', () => {
+      $('sidebar').classList.remove('open');$('sidebarOverlay').classList.remove('show');
+    });
+
+    /* Auth Session UI Controller */
+    function setAuthenticated(user) {
+      if (user) {
+        $('loginWrapper').style.display = 'none';$('appLayout').style.display = 'flex';
+        const name = user.user_metadata?.username || user.email.split('@')[0];
+        $('userNameLabel').textContent = name;
+        $('userEmailLabel').textContent = user.email;
+        $('avatarInitial').textContent = name.charAt(0).toUpperCase();$('newUsername').value = user.user_metadata?.username || '';
+        loadProducts();
+        loadVideoBgSettings();
+      } else {
+        $('loginWrapper').style.display = 'flex';$('appLayout').style.display = 'none';
+      }
+    }
+     async function initSession() {
+      const { data, error } = await db.auth.getSession();
+      if (error) {
+        showStatus('loginStatus', error.message, true);
+        return;
+      }
+      setAuthenticated(data?.session?.user || null);
+    }
+    db.auth.onAuthStateChange((_, session) => setAuthenticated(session?.user || null));
+
+    /* Login Form */
+    $('loginForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const btn = e.submitter || e.target.querySelector('button');
+      btn.disabled = true;
+      btn.textContent = 'Memverifikasi...';
+      try {
+        const { data, error } = await db.auth.signInWithPassword({
+          email: $('loginEmail').value.trim(),
+          password: $('loginPassword').value
+        });
+        if (error) throw error;
+        setAuthenticated(data.user);
+      } catch (err) {
+        showStatus('loginStatus', 'Gagal masuk: ' + (err.message || 'Periksa email & kata sandi.'), true);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Masuk ke Dashboard';
+      }
+    });
+
+    /* Logout */
+    $('logoutBtn').addEventListener('click', async () => {
+      if (confirm('Keluar dari panel admin?')) {
+        await db.auth.signOut();
+        setAuthenticated(null);
+      }
+    });
+
+    /* Storage Upload Function */
+    async function uploadImage(file, folder) {
+      if (!file || !['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+        throw new Error('Pilih format JPG, PNG, atau WEBP.');
+      }
+      if (file.size > 5 * 1024 * 1024) throw new Error('Ukuran foto maksimal 5 MB.');
+      const path = `${folder}/${crypto.randomUUID()}-${safeFileName(file.name)}`;
+      const { error: upErr } = await db.storage.from(BUCKET).upload(path, file, { contentType: file.type });
+      if (upErr) throw upErr;
+      const { data } = db.storage.from(BUCKET).getPublicUrl(path);
+      return data.publicUrl;
+    }
+
+    /* Upload Video Function (Galeri) */
+    async function uploadVideoFile(file, folder) {
+      if (!file || !['video/mp4', 'video/webm'].includes(file.type)) {
+        throw new Error('Pilih format video MP4 atau WEBM.');
+      }
+      // Ditingkatkan menjadi 350 MB agar aman untuk video galeri
+      if (file.size > 350 * 1024 * 1024) {
+        throw new Error('Ukuran video maksimal 250 MB.');
+      }
+      const path = `${folder}/${crypto.randomUUID()}-${safeFileName(file.name)}`;
+      const { error: upErr } = await db.storage.from(BUCKET).upload(path, file, { contentType: file.type });
+      if (upErr) throw upErr;
+      const { data } = db.storage.from(BUCKET).getPublicUrl(path);
+      return data.publicUrl;
+    }
+
+    /* Change Banner Hero */
+    $('heroFile').addEventListener('change', e => {
+      const f = e.target.files[0];
+      if (f) $('heroPreview').src = URL.createObjectURL(f);
+    });
+    $('heroForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const btn = e.target.querySelector('button');
+      btn.disabled = true;
+      try {
+        const url = await uploadImage($('heroFile').files[0], 'hero');
+        const { error } = await db.from('site_settings').upsert({
+          key: 'hero_image_url',
+          value: url,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'key' });
+        if (error) throw error;
+        showStatus('heroStatus', 'Foto utama berhasil diperbarui!');
+        $('heroFile').value = '';
+      } catch (err) {
+        showStatus('heroStatus', err.message || 'Gagal mengubah banner.', true);
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    /* Background Video Settings (Galeri dengan Suara) */
+    async function loadVideoBgSettings() {
+      const { data, error } = await db.from('site_settings').select('value').eq('key', 'site_video_bg_url').single();
+      const container = $('videoPreviewContainer');
+      
+      if (data && data.value) {
+        container.innerHTML = `
+          <video src="${data.value}" controls autoplay loop style="width:100%; height:100%; object-fit:cover;"></video>
+        `;
+      } else {
+        container.innerHTML = 'Belum ada video latar belakang';
+      }
+    }
+
+    $('videoBgForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const btn = e.target.querySelector('button');
+      const fileInput = $('videoFile');
+      
+          if (!fileInput.files[0]) return;
+
+      btn.disabled = true;
+      btn.textContent = 'Mengunggah video... (Mohon tunggu)';
+
+      try {
+        const videoUrl = await uploadVideoFile(fileInput.files[0], 'video-bg');
+        
+        const { error } = await db.from('site_settings').upsert({
+          key: 'site_video_bg_url',
+          value: videoUrl,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'key' });
+
+        if (error) throw error;
+
+        showStatus('videoStatus', 'Background video berhasil diperbarui!');
+        fileInput.value = '';
+        await loadVideoBgSettings();
+      } catch (err) {
+        showStatus('videoStatus', err.message || 'Gagal mengunggah video.', true);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Upload & Simpan Background Video';
+      }
+    });
+
+    /* Add Product */
+    $('productForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const btn = e.target.querySelector('button');
+      btn.disabled = true;
+      try {
+        const name = $('productName').value.trim();
+        const url = await uploadImage($('productFile').files[0], 'products');
+        const { error } = await db.from('produk_bengkel').insert({ nama: name, img: url });
+        if (error) throw error;
+        showStatus('productStatus', 'Produk berhasil dipublikasikan!');
+        $('productName').value = '';$('productFile').value = '';
+        await loadProducts();
+      } catch (err) {
+        showStatus('productStatus', err.message || 'Gagal menambahkan produk.', true);
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    /* Load & Delete Products */
+    async function loadProducts() {
+      const container = $('productList');
+      container.innerHTML = '<p style="color:var(--text-muted)">Memuat produk...</p>';
+      const { data, error } = await db.from('produk_bengkel').select('id, nama, img').order('id', { ascending: false });
+      if (error) {
+        container.innerHTML = '<p style="color:#f87171">Gagal memuat produk: ' + error.message + '</p>';
+        return;
+      }
+      $('statTotalProduct').textContent = data ? data.length : 0;
+      if (!data || data.length === 0) {
+        container.innerHTML = '<p style="color:var(--text-muted)">Belum ada foto produk.</p>';
+        return;
+      }
+      container.replaceChildren();
+      data.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        card.innerHTML = `
+          <img src="${p.img || ''}" alt="${p.nama || 'Pekerjaan'}" loading="lazy">
+          <div class="product-card-body">
+            <h3>${p.nama || 'Tanpa Nama'}</h3>
+            <button class="btn danger" style="padding:7px; font-size:12px; width:100%;">Hapus</button>
+          </div>
+        `;
+        card.querySelector('button').addEventListener('click', async () => {
+          if (confirm(`Hapus produk "${p.nama}"?`)) {
+            const { error: delErr } = await db.from('produk_bengkel').delete().eq('id', p.id);
+            if (delErr) {
+              alert('Gagal menghapus: ' + delErr.message);
+            } else {
+              loadProducts();
+            }
+          }
+        });
+        container.appendChild(card);
+      });
+    }
+  /* Update Account */
+    $('accountForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const btn = e.target.querySelector('button');
+      const username = $('newUsername').value.trim();
+      const password = $('newPassword').value;
+      if (username.length < 3) return showStatus('accountStatus', 'Username minimal 3 karakter.', true);
+      btn.disabled = true;
+      try {
+        const updates = { data: { username } };
+        if (password) {
+          if (password.length < 8) throw new Error('Password baru minimal 8 karakter.');
+          updates.password = password;
+        }
+        const { data, error } = await db.auth.updateUser(updates);
+        if (error) throw error;
+        $('newPassword').value = '';
+        setAuthenticated(data.user);
+        showStatus('accountStatus', 'Profil akun berhasil disimpan.');
+      } catch (err) {
+        showStatus('accountStatus', err.message || 'Gagal menyimpan profil.', true);
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    initSession();
+  </script>
+</body>
+</html>
